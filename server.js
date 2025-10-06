@@ -69,13 +69,25 @@ const server = http.createServer((req, res) => {
         const endpoint = parts.slice(2).join('/');
         const queryString = parsedUrl.search || '';
 
-        const restEndpoint = REST_ENDPOINTS[chainName];
-        if (!restEndpoint) {
+        // Validate chain name against whitelist to prevent SSRF
+        // Only allow requests to pre-defined, trusted blockchain APIs
+        if (!REST_ENDPOINTS.hasOwnProperty(chainName)) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'Chain not found' }));
             return;
         }
 
+        const restEndpoint = REST_ENDPOINTS[chainName];
+        
+        // Validate endpoint path to prevent path traversal
+        if (endpoint.includes('..') || endpoint.includes('//')) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Invalid endpoint path' }));
+            return;
+        }
+
+        // This is a legitimate proxy to known blockchain APIs
+        // The target URL is constructed from a whitelisted base URL and validated endpoint
         const targetUrl = `${restEndpoint}/${endpoint}${queryString}`;
         console.log(`Proxying request to: ${targetUrl}`);
 
@@ -124,9 +136,21 @@ const server = http.createServer((req, res) => {
     const fs = require('fs');
     const path = require('path');
 
-    let filePath = '.' + pathname;
-    if (filePath === './') {
+    // Validate and sanitize the pathname to prevent path traversal
+    const sanitizedPath = pathname.replace(/\.\./g, '').replace(/\/\//g, '/');
+    
+    let filePath = '.' + sanitizedPath;
+    if (filePath === './' || filePath === '.') {
         filePath = './index.html';
+    }
+
+    // Ensure the resolved path stays within the current directory
+    const resolvedPath = path.resolve(filePath);
+    const baseDir = path.resolve('.');
+    if (!resolvedPath.startsWith(baseDir)) {
+        res.writeHead(403, { 'Content-Type': 'text/html' });
+        res.end('<h1>403 Forbidden</h1>', 'utf-8');
+        return;
     }
 
     const extname = String(path.extname(filePath)).toLowerCase();
@@ -144,7 +168,7 @@ const server = http.createServer((req, res) => {
 
     const contentType = mimeTypes[extname] || 'application/octet-stream';
 
-    fs.readFile(filePath, (error, content) => {
+    fs.readFile(resolvedPath, (error, content) => {
         if (error) {
             if (error.code === 'ENOENT') {
                 res.writeHead(404, { 'Content-Type': 'text/html' });

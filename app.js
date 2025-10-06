@@ -302,28 +302,59 @@ class CosmosWalletChecker {
         const blockHeightDisplay = document.getElementById('blockHeightDisplay');
         const balancesDisplay = document.getElementById('balancesDisplay');
         
-        blockHeightDisplay.innerHTML = `<strong>Block Height:</strong> ${blockHeight}`;
+        // Safely set block height text content
+        blockHeightDisplay.innerHTML = '';
+        const blockHeightStrong = document.createElement('strong');
+        blockHeightStrong.textContent = 'Block Height:';
+        blockHeightDisplay.appendChild(blockHeightStrong);
+        blockHeightDisplay.appendChild(document.createTextNode(' ' + this.escapeHtml(blockHeight)));
         
         if (balances.length === 0) {
-            balancesDisplay.innerHTML = '<div class="no-balances">No balances found at this block height.</div>';
+            balancesDisplay.innerHTML = '';
+            const noBalancesDiv = document.createElement('div');
+            noBalancesDiv.className = 'no-balances';
+            noBalancesDiv.textContent = 'No balances found at this block height.';
+            balancesDisplay.appendChild(noBalancesDiv);
         } else {
             balancesDisplay.innerHTML = '';
             balances.forEach(balance => {
                 const formatted = this.formatBalance(balance.amount, balance.denom, assetsInfo);
                 const balanceItem = document.createElement('div');
                 balanceItem.className = 'balance-item';
-                balanceItem.innerHTML = `
-                    <div class="asset-info">
-                        <div class="asset-name">${formatted.name}</div>
-                        <div class="asset-denom">${formatted.denom}</div>
-                    </div>
-                    <div class="balance-amount">${formatted.amount} ${formatted.displayDenom}</div>
-                `;
+                
+                // Create asset info div
+                const assetInfo = document.createElement('div');
+                assetInfo.className = 'asset-info';
+                
+                const assetName = document.createElement('div');
+                assetName.className = 'asset-name';
+                assetName.textContent = formatted.name;
+                
+                const assetDenom = document.createElement('div');
+                assetDenom.className = 'asset-denom';
+                assetDenom.textContent = formatted.denom;
+                
+                assetInfo.appendChild(assetName);
+                assetInfo.appendChild(assetDenom);
+                
+                // Create balance amount div
+                const balanceAmount = document.createElement('div');
+                balanceAmount.className = 'balance-amount';
+                balanceAmount.textContent = `${formatted.amount} ${formatted.displayDenom}`;
+                
+                balanceItem.appendChild(assetInfo);
+                balanceItem.appendChild(balanceAmount);
                 balancesDisplay.appendChild(balanceItem);
             });
         }
         
         resultsSection.style.display = 'block';
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     showLoading() {
