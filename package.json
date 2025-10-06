@@ -1,0 +1,19 @@
+{
+  "name": "cosmos-chain-wallet-checker",
+  "version": "1.0.0",
+  "description": "A simple tool to check wallet balances for any Cosmos-based blockchain at specific block heights",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "cosmos",
+    "blockchain",
+    "wallet",
+    "balance",
+    "checker"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmos Chain Wallet Checker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cosmos Chain Wallet Checker</h1>
+            <p>Check wallet balances at specific block heights</p>
+        </header>
+
+        <main>
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="walletAddress">Wallet Address:</label>
+                    <input type="text" id="walletAddress" placeholder="cosmos1..." required>
+                    <small class="help-text">Enter a Cosmos-based wallet address</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="chainSelect">Chain:</label>
+                    <select id="chainSelect" required>
+                        <option value="">Loading chains...</option>
+                    </select>
+                    <small class="help-text">Select a chain from the Cosmos ecosystem</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="blockHeight">Block Height (optional):</label>
+                    <input type="number" id="blockHeight" placeholder="Leave empty for latest">
+                    <small class="help-text">Enter a specific block height, or leave empty for latest balance</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="dateTime">Or Select Date/Time (optional):</label>
+                    <input type="datetime-local" id="dateTime">
+                    <small class="help-text">Alternative to block height: select a date/time</small>
+                </div>
+
+                <button id="checkBalanceBtn" class="btn-primary">Check Balance</button>
+            </div>
+
+            <div id="loadingIndicator" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
+
+            <div id="resultsSection" class="results-section" style="display: none;">
+                <h2>Balance Results</h2>
+                <div id="blockHeightDisplay" class="block-height-display"></div>
+                <div id="balancesDisplay" class="balances-display"></div>
+            </div>
+
+            <div id="errorSection" class="error-section" style="display: none;">
+                <h3>Error</h3>
+                <p id="errorMessage"></p>
+            </div>
+        </main>
+
+        <footer>
+            <p>Built with ❤️ for the Cosmos ecosystem</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
