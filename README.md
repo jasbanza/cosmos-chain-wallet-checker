@@ -2,6 +2,10 @@
 
 A simple web-based tool to check wallet balances for any Cosmos-based blockchain at specific block heights.
 
+## 🚀 Live Demo
+
+**Try it now:** [https://jasbanza.github.io/cosmos-chain-wallet-checker/](https://jasbanza.github.io/cosmos-chain-wallet-checker/)
+
 ## Features
 
 - 🔍 Check wallet balances at any block height or date/time
