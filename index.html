@@ -30,6 +30,12 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="rpcUrl">RPC URL (optional):</label>
+                    <input type="url" id="rpcUrl" placeholder="/api/cosmoshub">
+                    <small class="help-text">Override default RPC server (e.g., use an archive node URL)</small>
+                </div>
+
+                <div class="form-group">
                     <label for="blockHeight">Block Height (optional):</label>
                     <input type="number" id="blockHeight" placeholder="Leave empty for latest">
                     <small class="help-text">Enter a specific block height, or leave empty for latest balance</small>
