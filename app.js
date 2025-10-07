@@ -4,6 +4,7 @@ class CosmosWalletChecker {
     constructor() {
         this.chains = [];
         this.selectedChain = null;
+        this.customRpcUrl = null;
         this.init();
     }
 
@@ -91,12 +92,20 @@ class CosmosWalletChecker {
     setupEventListeners() {
         const checkBtn = document.getElementById('checkBalanceBtn');
         const chainSelect = document.getElementById('chainSelect');
+        const rpcUrlInput = document.getElementById('rpcUrl');
         
         checkBtn.addEventListener('click', () => this.handleCheckBalance());
         
         chainSelect.addEventListener('change', (e) => {
             const chainName = e.target.value;
             this.selectedChain = this.chains.find(c => c.chain_name === chainName);
+            
+            // Populate RPC URL field with default endpoint
+            if (chainName) {
+                rpcUrlInput.value = this.getRESTEndpoint(chainName);
+            } else {
+                rpcUrlInput.value = '';
+            }
         });
     }
 
@@ -104,6 +113,7 @@ class CosmosWalletChecker {
         const walletAddress = document.getElementById('walletAddress').value.trim();
         const blockHeight = document.getElementById('blockHeight').value.trim();
         const dateTime = document.getElementById('dateTime').value;
+        const rpcUrl = document.getElementById('rpcUrl').value.trim();
 
         if (!walletAddress) {
             this.showError('Please enter a wallet address.');
@@ -120,8 +130,11 @@ class CosmosWalletChecker {
         this.hideResults();
 
         try {
+            // Store custom RPC URL if provided
+            this.customRpcUrl = rpcUrl || null;
+            
             // Get REST endpoint for the selected chain
-            const restEndpoint = this.getRESTEndpoint(this.selectedChain.chain_name);
+            const restEndpoint = this.getRESTEndpoint(this.selectedChain.chain_name, this.customRpcUrl);
             
             if (!restEndpoint) {
                 throw new Error('No REST endpoint available for this chain');
@@ -153,7 +166,12 @@ class CosmosWalletChecker {
         }
     }
 
-    getRESTEndpoint(chainName) {
+    getRESTEndpoint(chainName, customRpcUrl = null) {
+        // If custom RPC URL is provided, use it
+        if (customRpcUrl) {
+            return customRpcUrl;
+        }
+        
         // Use local proxy server to avoid CORS issues
         // In production, this would be configured differently
         return `/api/${chainName}`;
