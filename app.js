@@ -205,6 +205,17 @@ class CosmosWalletChecker {
 
     async getLatestBlockHeight(restEndpoint) {
         const response = await fetch(`${restEndpoint}/cosmos/base/tendermint/v1beta1/blocks/latest`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch latest block: ${response.status} ${response.statusText}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            throw new Error(`Expected JSON response but got: ${contentType}. Response: ${text.substring(0, 100)}`);
+        }
+        
         const data = await response.json();
         return data.block.header.height;
     }
@@ -217,6 +228,17 @@ class CosmosWalletChecker {
         
         // Get latest block info
         const latestBlockResponse = await fetch(`${restEndpoint}/cosmos/base/tendermint/v1beta1/blocks/latest`);
+        
+        if (!latestBlockResponse.ok) {
+            throw new Error(`Failed to fetch latest block: ${latestBlockResponse.status} ${latestBlockResponse.statusText}`);
+        }
+        
+        const contentType = latestBlockResponse.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await latestBlockResponse.text();
+            throw new Error(`Expected JSON response but got: ${contentType}. Response: ${text.substring(0, 100)}`);
+        }
+        
         const latestBlockData = await latestBlockResponse.json();
         const latestTimestamp = new Date(latestBlockData.block.header.time).getTime();
         
@@ -241,6 +263,17 @@ class CosmosWalletChecker {
         }
         
         const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch balances: ${response.status} ${response.statusText}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            throw new Error(`Expected JSON response but got: ${contentType}. Response: ${text.substring(0, 100)}`);
+        }
+        
         const data = await response.json();
         
         if (data.code) {
