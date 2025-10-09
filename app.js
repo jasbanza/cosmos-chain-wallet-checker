@@ -5,75 +5,46 @@ class CosmosWalletChecker {
         this.chains = [];
         this.selectedChain = null;
         this.customRpcUrl = null;
+        this.chainRegistry = null;
         this.init();
     }
 
     async init() {
         await this.loadChains();
         this.setupEventListeners();
+        this.handleUrlParameters();
     }
 
     async loadChains() {
         try {
-            // Use a curated list of popular chains with their data
-            // In production, this would fetch from chain registry
-            this.chains = [
-                {
-                    chain_name: 'cosmoshub',
-                    pretty_name: 'Cosmos Hub',
-                    bech32_prefix: 'cosmos'
-                },
-                {
-                    chain_name: 'osmosis',
-                    pretty_name: 'Osmosis',
-                    bech32_prefix: 'osmo'
-                },
-                {
-                    chain_name: 'akash',
-                    pretty_name: 'Akash',
-                    bech32_prefix: 'akash'
-                },
-                {
-                    chain_name: 'juno',
-                    pretty_name: 'Juno',
-                    bech32_prefix: 'juno'
-                },
-                {
-                    chain_name: 'stargaze',
-                    pretty_name: 'Stargaze',
-                    bech32_prefix: 'stars'
-                },
-                {
-                    chain_name: 'secretnetwork',
-                    pretty_name: 'Secret Network',
-                    bech32_prefix: 'secret'
-                },
-                {
-                    chain_name: 'celestia',
-                    pretty_name: 'Celestia',
-                    bech32_prefix: 'celestia'
-                },
-                {
-                    chain_name: 'injective',
-                    pretty_name: 'Injective',
-                    bech32_prefix: 'inj'
-                },
-                {
-                    chain_name: 'dydx',
-                    pretty_name: 'dYdX',
-                    bech32_prefix: 'dydx'
-                },
-                {
-                    chain_name: 'neutron',
-                    pretty_name: 'Neutron',
-                    bech32_prefix: 'neutron'
-                }
-            ];
+            // Load chain data from server endpoint (which fetches from chain registry)
+            const response = await fetch('/api/chain-registry/chains');
+            const registryData = await response.json();
+            
+            if (registryData && registryData.chains) {
+                this.chains = registryData.chains;
+                this.chainRegistry = registryData;
+            } else {
+                throw new Error('Invalid registry data');
+            }
             
             this.populateChainSelect();
         } catch (error) {
-            console.error('Error loading chains:', error);
-            this.showError('Failed to load chains. Please refresh the page.');
+            console.error('Error loading chains from registry:', error);
+            // Fallback to hardcoded list with chain registry data
+            this.chains = [
+                { chain_name: 'cosmoshub', pretty_name: 'Cosmos Hub', bech32_prefix: 'cosmos' },
+                { chain_name: 'osmosis', pretty_name: 'Osmosis', bech32_prefix: 'osmo' },
+                { chain_name: 'akash', pretty_name: 'Akash', bech32_prefix: 'akash' },
+                { chain_name: 'juno', pretty_name: 'Juno', bech32_prefix: 'juno' },
+                { chain_name: 'stargaze', pretty_name: 'Stargaze', bech32_prefix: 'stars' },
+                { chain_name: 'secretnetwork', pretty_name: 'Secret Network', bech32_prefix: 'secret' },
+                { chain_name: 'celestia', pretty_name: 'Celestia', bech32_prefix: 'celestia' },
+                { chain_name: 'injective', pretty_name: 'Injective', bech32_prefix: 'inj' },
+                { chain_name: 'dydx', pretty_name: 'dYdX', bech32_prefix: 'dydx' },
+                { chain_name: 'neutron', pretty_name: 'Neutron', bech32_prefix: 'neutron' }
+            ];
+            this.populateChainSelect();
         }
     }
 
@@ -93,6 +64,7 @@ class CosmosWalletChecker {
         const checkBtn = document.getElementById('checkBalanceBtn');
         const chainSelect = document.getElementById('chainSelect');
         const rpcUrlInput = document.getElementById('rpcUrl');
+        const walletInput = document.getElementById('walletAddress');
         
         checkBtn.addEventListener('click', () => this.handleCheckBalance());
         
@@ -107,6 +79,55 @@ class CosmosWalletChecker {
                 rpcUrlInput.value = '';
             }
         });
+        
+        // Auto-detect chain when wallet address is entered
+        walletInput.addEventListener('input', (e) => {
+            this.autoDetectChain(e.target.value);
+        });
+        
+        // Also detect on blur
+        walletInput.addEventListener('blur', (e) => {
+            this.autoDetectChain(e.target.value);
+        });
+    }
+
+    autoDetectChain(walletAddress) {
+        if (!walletAddress || walletAddress.length < 5) {
+            return;
+        }
+        
+        // Extract prefix from wallet address (everything before the '1')
+        const match = walletAddress.match(/^([a-z]+)1/);
+        if (!match) {
+            return;
+        }
+        
+        const prefix = match[1];
+        const chain = this.chains.find(c => c.bech32_prefix === prefix);
+        
+        if (chain) {
+            // Auto-select the chain
+            const chainSelect = document.getElementById('chainSelect');
+            chainSelect.value = chain.chain_name;
+            this.selectedChain = chain;
+            
+            // Update RPC URL
+            const rpcUrlInput = document.getElementById('rpcUrl');
+            rpcUrlInput.value = this.getRESTEndpoint(chain.chain_name);
+            
+            // Show visual feedback
+            this.showInfo(`Chain auto-detected: ${chain.pretty_name}`);
+        }
+    }
+    
+    handleUrlParameters() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const walletAddress = urlParams.get('wallet') || urlParams.get('address');
+        
+        if (walletAddress) {
+            document.getElementById('walletAddress').value = walletAddress;
+            this.autoDetectChain(walletAddress);
+        }
     }
 
     async handleCheckBalance() {
@@ -130,6 +151,11 @@ class CosmosWalletChecker {
         this.hideResults();
 
         try {
+            // Update URL with wallet parameter (without page reload)
+            const url = new URL(window.location);
+            url.searchParams.set('wallet', walletAddress);
+            window.history.pushState({}, '', url);
+            
             // Store custom RPC URL if provided
             this.customRpcUrl = rpcUrl || null;
             
@@ -388,10 +414,36 @@ class CosmosWalletChecker {
         const errorMessage = document.getElementById('errorMessage');
         errorMessage.textContent = message;
         errorSection.style.display = 'block';
+        this.hideInfo();
     }
 
     hideError() {
         document.getElementById('errorSection').style.display = 'none';
+    }
+
+    showInfo(message) {
+        let infoSection = document.getElementById('infoSection');
+        if (!infoSection) {
+            // Create info section if it doesn't exist
+            infoSection = document.createElement('div');
+            infoSection.id = 'infoSection';
+            infoSection.className = 'info-section';
+            infoSection.style.display = 'none';
+            const errorSection = document.getElementById('errorSection');
+            errorSection.parentNode.insertBefore(infoSection, errorSection);
+        }
+        infoSection.textContent = message;
+        infoSection.style.display = 'block';
+        
+        // Auto-hide after 3 seconds
+        setTimeout(() => this.hideInfo(), 3000);
+    }
+
+    hideInfo() {
+        const infoSection = document.getElementById('infoSection');
+        if (infoSection) {
+            infoSection.style.display = 'none';
+        }
     }
 
     hideResults() {

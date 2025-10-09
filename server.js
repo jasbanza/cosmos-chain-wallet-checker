@@ -56,6 +56,30 @@ const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const pathname = parsedUrl.pathname;
 
+    // Handle chain registry request
+    if (pathname === '/api/chain-registry/chains') {
+        // Return curated chain list with registry information
+        const chains = [
+            { chain_name: 'cosmoshub', pretty_name: 'Cosmos Hub', bech32_prefix: 'cosmos' },
+            { chain_name: 'osmosis', pretty_name: 'Osmosis', bech32_prefix: 'osmo' },
+            { chain_name: 'akash', pretty_name: 'Akash', bech32_prefix: 'akash' },
+            { chain_name: 'juno', pretty_name: 'Juno', bech32_prefix: 'juno' },
+            { chain_name: 'stargaze', pretty_name: 'Stargaze', bech32_prefix: 'stars' },
+            { chain_name: 'secretnetwork', pretty_name: 'Secret Network', bech32_prefix: 'secret' },
+            { chain_name: 'celestia', pretty_name: 'Celestia', bech32_prefix: 'celestia' },
+            { chain_name: 'injective', pretty_name: 'Injective', bech32_prefix: 'inj' },
+            { chain_name: 'dydx', pretty_name: 'dYdX', bech32_prefix: 'dydx' },
+            { chain_name: 'neutron', pretty_name: 'Neutron', bech32_prefix: 'neutron' }
+        ];
+        
+        res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        });
+        res.end(JSON.stringify({ chains: chains }));
+        return;
+    }
+
     // Handle API proxy requests: /api/{chain}/{endpoint}
     if (pathname.startsWith('/api/')) {
         const parts = pathname.split('/').filter(p => p);
