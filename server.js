@@ -31,6 +31,9 @@ const MOCK_DATA = {
                 { denom: 'uosmo', amount: '25000000' }
             ]
         },
+        'cosmos1skgg4564kke7ufq4swwxc8txwm2gcjked5qycc': {
+            'cosmoshub': []
+        },
         'osmo1vwrruj48vk8q49a7g8z08284wlvm9s6el6c7ej': {
             'osmosis': [
                 { denom: 'uosmo', amount: '123456789' },
