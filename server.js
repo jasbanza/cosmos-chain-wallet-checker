@@ -30,6 +30,12 @@ const MOCK_DATA = {
             'osmosis': [
                 { denom: 'uosmo', amount: '25000000' }
             ]
+        },
+        'osmo1vwrruj48vk8q49a7g8z08284wlvm9s6el6c7ej': {
+            'osmosis': [
+                { denom: 'uosmo', amount: '123456789' },
+                { denom: 'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2', amount: '50000000' }
+            ]
         }
     },
     blockHeight: '23456789',
