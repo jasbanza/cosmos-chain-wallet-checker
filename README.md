@@ -14,17 +14,45 @@ A simple web-based tool to check wallet balances for any Cosmos-based blockchain
 - ⏱️ Select specific block height or use date/time picker
 - 📊 Shows actual block height used for the query
 - 🎨 Clean, responsive UI
+- 🤖 **Auto-detect chain from wallet address** (e.g., `osmo1...` → Osmosis)
+- 🔗 **URL parameter support** for deep linking (`?wallet=osmo1...`)
+- ⚡ **Async JavaScript** - no page reloads, smooth UX
 
 ## Usage
 
-1. Open `index.html` in your web browser
-2. Enter a wallet address (e.g., `cosmos1...`)
-3. Select a chain from the dropdown menu
+### Basic Usage
+
+1. Open `index.html` in your web browser (or navigate to http://localhost:3000)
+2. Enter a wallet address (e.g., `osmo1vwrruj48vk8q49a7g8z08284wlvm9s6el6c7ej`)
+3. **Chain is automatically detected** from the wallet prefix
 4. Optionally:
    - Enter a specific block height, OR
    - Select a date/time using the date picker
    - Leave both empty to get the latest balance
 5. Click "Check Balance"
+
+### Direct Link with Wallet Address
+
+You can share a direct link with a wallet address:
+```
+http://localhost:3000?wallet=osmo1vwrruj48vk8q49a7g8z08284wlvm9s6el6c7ej
+```
+
+The chain will be auto-detected and pre-selected.
+
+### Supported Chain Prefixes
+
+The following wallet prefixes are automatically detected:
+- `cosmos1...` → Cosmos Hub
+- `osmo1...` → Osmosis
+- `juno1...` → Juno
+- `stars1...` → Stargaze
+- `inj1...` → Injective
+- `akash1...` → Akash
+- `secret1...` → Secret Network
+- `celestia1...` → Celestia
+- `dydx1...` → dYdX
+- `neutron1...` → Neutron
 
 ## How It Works
 
